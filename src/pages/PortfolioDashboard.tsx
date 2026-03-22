@@ -1,12 +1,19 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 // standalone project — no router links needed
-import { Search, ArrowRight, ExternalLink, ChevronDown, LayoutGrid, List, AlertTriangle, Clock, Zap, Brain, TrendingUp, Globe, Link2, Target, Activity, ArrowUpRight, Shield, Lightbulb, Network } from "lucide-react";
+import { Search, Plus, ArrowRight, ExternalLink, ChevronDown, ChevronRight, LayoutGrid, List, AlertTriangle, CheckCircle2, Clock, Zap, Filter, Brain, TrendingUp, Globe, Link2, Target, Activity, ArrowUpRight, Shield, Lightbulb, Network, ClipboardList, Edit3, Sparkles } from "lucide-react";
 import { GOOGLE_TOOLS } from "@/data/googleToolsRegistry";
 import { VERTICALS, STAGES } from "@/data/verticalDefinitions";
 import { PROJECTS_SEED } from "@/data/projectsSeed";
 import { calculateReadinessScore, generateRecommendations, getPortfolioStats, type Project, type ToolStatus } from "@/lib/commercializationEngine";
 import { analyzePortfolio, type InsightType, type InsightSeverity } from "@/lib/portfolioIntelligence";
+import { recordSnapshot, getProjectHistory, getPortfolioTrend } from "@/lib/scoreHistory";
+import { generateBriefing } from "@/lib/briefingGenerator";
 import Tooltip from "@/components/Tooltip";
+import Sparkline from "@/components/Sparkline";
+import ExportMenu from "@/components/ExportMenu";
+import ProjectModal from "@/components/ProjectModal";
+import ActionQueue from "@/components/ActionQueue";
+import AIAdvisor from "@/components/AIAdvisor";
 
 // Tooltip descriptions for summary cards, stages, priorities, etc.
 const TIPS = {
@@ -78,20 +85,28 @@ export default function PortfolioDashboard() {
   const [search, setSearch] = useState("");
   const [filterVertical, setFilterVertical] = useState<string>("all");
   const [filterStage, setFilterStage] = useState<string>("all");
-  const [activeTab, setActiveTab] = useState<"grid" | "recommendations" | "matrix" | "intelligence">("grid");
+  const [filterCountry, setFilterCountry] = useState<string>("all");
+  const [filterRevenue, setFilterRevenue] = useState<string>("all");
+  const [filterPriority, setFilterPriority] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<"grid" | "recommendations" | "matrix" | "intelligence" | "queue" | "advisor">("grid");
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
+  const [modalProject, setModalProject] = useState<Project | undefined>(undefined);
+  const [showModal, setShowModal] = useState(false);
 
   const filtered = useMemo(() => {
     return projects
       .filter((p) => !p.archived)
       .filter((p) => filterVertical === "all" || p.vertical === filterVertical)
       .filter((p) => filterStage === "all" || p.stage === filterStage)
+      .filter((p) => filterCountry === "all" || p.country === filterCountry)
+      .filter((p) => filterRevenue === "all" || p.revenueRange === filterRevenue)
+      .filter((p) => filterPriority === "all" || String(p.priority) === filterPriority)
       .filter((p) => search === "" || p.name.toLowerCase().includes(search.toLowerCase()) || p.tags.some((t) => t.includes(search.toLowerCase())))
       .sort((a, b) => {
         if (a.priority !== b.priority) return b.priority - a.priority;
         return calculateReadinessScore(b) - calculateReadinessScore(a);
       });
-  }, [projects, search, filterVertical, filterStage]);
+  }, [projects, search, filterVertical, filterStage, filterCountry, filterRevenue, filterPriority]);
 
   const stats = useMemo(() => getPortfolioStats(projects), [projects]);
   const intelligence = useMemo(() => analyzePortfolio(projects), [projects]);
@@ -133,6 +148,41 @@ export default function PortfolioDashboard() {
     });
   }, []);
 
+  const saveProject = useCallback((project: Project) => {
+    setProjects((prev) => {
+      const exists = prev.find((p) => p.id === project.id);
+      const next = exists ? prev.map((p) => p.id === project.id ? project : p) : [...prev, project];
+      saveProjects(next);
+      return next;
+    });
+    setShowModal(false);
+    setModalProject(undefined);
+  }, []);
+
+  const archiveProject = useCallback((id: string) => {
+    setProjects((prev) => {
+      const next = prev.map((p) => p.id === id ? { ...p, archived: true } : p);
+      saveProjects(next);
+      return next;
+    });
+    setShowModal(false);
+    setModalProject(undefined);
+  }, []);
+
+  // Record score snapshot on each render when projects change
+  useEffect(() => {
+    recordSnapshot(projects, intelligence.portfolioHealth);
+  }, [projects, intelligence.portfolioHealth]);
+
+  // Unique countries for filter
+  const countries = useMemo(() => {
+    const set = new Set(projects.filter((p) => !p.archived).map((p) => p.country));
+    return Array.from(set).sort();
+  }, [projects]);
+
+  const handleExportBriefing = useCallback(() => generateBriefing(projects), [projects]);
+  const handleExportJSON = useCallback(() => JSON.stringify(projects.filter((p) => !p.archived), null, 2), [projects]);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
@@ -142,7 +192,17 @@ export default function PortfolioDashboard() {
             <h1 className="text-lg font-bold tracking-tight">CORTEX3 Portfolio Command Center</h1>
             <p className="text-xs text-muted-foreground mt-0.5">Google Ecosystem + Presenca Comercial</p>
           </div>
-          <span className="text-[10px] text-muted-foreground/50 font-mono">v1.0</span>
+          <div className="flex items-center gap-2">
+            <ExportMenu onExportBriefing={handleExportBriefing} onExportJSON={handleExportJSON} />
+            <button
+              onClick={() => { setModalProject(undefined); setShowModal(true); }}
+              className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-[11px] font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Novo projeto
+            </button>
+            <span className="text-[10px] text-muted-foreground/50 font-mono">v2.0</span>
+          </div>
         </div>
       </header>
 
@@ -225,6 +285,26 @@ export default function PortfolioDashboard() {
                 <option key={s.id} value={s.id}>{s.label}</option>
               ))}
             </select>
+            <select
+              value={filterCountry}
+              onChange={(e) => setFilterCountry(e.target.value)}
+              className="h-9 rounded-lg border border-border/40 bg-card/40 px-3 text-sm outline-none focus:border-primary/50"
+            >
+              <option value="all">Todos paises</option>
+              {countries.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+            <select
+              value={filterPriority}
+              onChange={(e) => setFilterPriority(e.target.value)}
+              className="h-9 rounded-lg border border-border/40 bg-card/40 px-3 text-sm outline-none focus:border-primary/50"
+            >
+              <option value="all">Todas prioridades</option>
+              <option value="2">Alta</option>
+              <option value="1">Media</option>
+              <option value="0">Baixa</option>
+            </select>
           </div>
           <div className="flex items-center gap-1 bg-card/40 rounded-lg border border-border/30 p-0.5">
             <button onClick={() => setActiveTab("grid")} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${activeTab === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
@@ -235,6 +315,12 @@ export default function PortfolioDashboard() {
             </button>
             <button onClick={() => setActiveTab("intelligence")} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${activeTab === "intelligence" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
               <Brain className="h-3.5 w-3.5 inline mr-1" />Inteligencia
+            </button>
+            <button onClick={() => setActiveTab("advisor")} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${activeTab === "advisor" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+              <Sparkles className="h-3.5 w-3.5 inline mr-1" />AI Advisor
+            </button>
+            <button onClick={() => setActiveTab("queue")} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${activeTab === "queue" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+              <ClipboardList className="h-3.5 w-3.5 inline mr-1" />Fila
             </button>
             <button onClick={() => setActiveTab("matrix")} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${activeTab === "matrix" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
               <List className="h-3.5 w-3.5 inline mr-1" />Matrix
@@ -257,7 +343,13 @@ export default function PortfolioDashboard() {
                   <div className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm truncate">{project.name}</h3>
+                        <button
+                          onClick={() => { setModalProject(project); setShowModal(true); }}
+                          className="font-semibold text-sm truncate hover:text-primary transition-colors flex items-center gap-1 group"
+                        >
+                          {project.name}
+                          <Edit3 className="h-3 w-3 opacity-0 group-hover:opacity-60 transition-opacity" />
+                        </button>
                         <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{project.description}</p>
                       </div>
                       {/* Score ring */}
@@ -271,6 +363,15 @@ export default function PortfolioDashboard() {
                         </div>
                       </Tooltip>
                     </div>
+
+                    {(() => {
+                      const hist = getProjectHistory(project.id);
+                      return hist.length >= 2 ? (
+                        <div className="mt-1">
+                          <Sparkline data={hist.map((h) => h.score)} width={80} height={18} />
+                        </div>
+                      ) : null;
+                    })()}
 
                     <div className="flex items-center gap-1.5 mt-2">
                       <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${STAGE_COLORS[project.stage]}`}>
@@ -683,6 +784,16 @@ export default function PortfolioDashboard() {
           </div>
         )}
 
+        {/* AI Advisor View */}
+        {activeTab === "advisor" && (
+          <AIAdvisor projects={projects} isActive={activeTab === "advisor"} />
+        )}
+
+        {/* Queue View */}
+        {activeTab === "queue" && (
+          <ActionQueue projects={projects} onToolStatusUpdate={(pid, tid, status) => updateToolStatus(pid, tid, status as ToolStatus)} />
+        )}
+
         {/* Matrix View */}
         {activeTab === "matrix" && (
           <div className="overflow-x-auto">
@@ -742,6 +853,16 @@ export default function PortfolioDashboard() {
           </div>
         )}
       </div>
+
+      {/* Project Modal */}
+      {showModal && (
+        <ProjectModal
+          project={modalProject}
+          onSave={saveProject}
+          onClose={() => { setShowModal(false); setModalProject(undefined); }}
+          onArchive={archiveProject}
+        />
+      )}
     </div>
   );
 }

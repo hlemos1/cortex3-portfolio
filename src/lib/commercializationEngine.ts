@@ -23,6 +23,7 @@ export interface Project {
   tags: string[];
   priority: number;
   archived: boolean;
+  notes?: string;
   toolStatuses: ProjectToolStatus[];
 }
 
