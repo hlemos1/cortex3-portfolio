@@ -46,6 +46,8 @@ Antes de aprovar um PR, verifique:
 
 ## Setup de Desenvolvimento
 
+Stack: Vite + React (dashboard)
+
 ```bash
 git clone https://github.com/hlemos1/cortex3-portfolio.git
 cd cortex3-portfolio
