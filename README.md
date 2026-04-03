@@ -2,7 +2,7 @@
 
 > Dashboard de portfolio do ecossistema Cortex3 com motor de inteligencia e engine de comercializacao
 
-[![CI](https://github.com/institutoveigacabral-maker/cortex3-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/institutoveigacabral-maker/cortex3-portfolio/actions/workflows/ci.yml)
+[![CI](https://github.com/hlemos1/cortex3-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/hlemos1/cortex3-portfolio/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 ## Stack
@@ -20,7 +20,7 @@
 ## Quick Start
 
 ```bash
-git clone https://github.com/institutoveigacabral-maker/cortex3-portfolio.git
+git clone https://github.com/hlemos1/cortex3-portfolio.git
 cd cortex3-portfolio
 npm install
 npm run dev
