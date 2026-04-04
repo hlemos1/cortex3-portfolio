@@ -1,12 +1,12 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 // standalone project — no router links needed
-import { Search, Plus, ArrowRight, ExternalLink, ChevronDown, ChevronRight, LayoutGrid, List, AlertTriangle, CheckCircle2, Clock, Zap, Filter, Brain, TrendingUp, Globe, Link2, Target, Activity, ArrowUpRight, Shield, Lightbulb, Network, ClipboardList, Edit3, Sparkles } from "lucide-react";
+import { Search, Plus, ArrowRight, ExternalLink, ChevronDown, LayoutGrid, List, AlertTriangle, Clock, Zap, Brain, TrendingUp, Globe, Link2, Target, Activity, ArrowUpRight, Shield, Lightbulb, Network, ClipboardList, Edit3, Sparkles } from "lucide-react";
 import { GOOGLE_TOOLS } from "@/data/googleToolsRegistry";
 import { VERTICALS, STAGES } from "@/data/verticalDefinitions";
 import { PROJECTS_SEED } from "@/data/projectsSeed";
 import { calculateReadinessScore, generateRecommendations, getPortfolioStats, type Project, type ToolStatus } from "@/lib/commercializationEngine";
 import { analyzePortfolio, type InsightType, type InsightSeverity } from "@/lib/portfolioIntelligence";
-import { recordSnapshot, getProjectHistory, getPortfolioTrend } from "@/lib/scoreHistory";
+import { recordSnapshot, getProjectHistory } from "@/lib/scoreHistory";
 import { generateBriefing } from "@/lib/briefingGenerator";
 import Tooltip from "@/components/Tooltip";
 import Sparkline from "@/components/Sparkline";
@@ -86,6 +86,7 @@ export default function PortfolioDashboard() {
   const [filterVertical, setFilterVertical] = useState<string>("all");
   const [filterStage, setFilterStage] = useState<string>("all");
   const [filterCountry, setFilterCountry] = useState<string>("all");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [filterRevenue, setFilterRevenue] = useState<string>("all");
   const [filterPriority, setFilterPriority] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<"grid" | "recommendations" | "matrix" | "intelligence" | "queue" | "advisor">("grid");

@@ -7,7 +7,6 @@ import {
 } from "@/lib/commercializationEngine";
 import { analyzePortfolio } from "@/lib/portfolioIntelligence";
 import { VERTICALS, STAGES } from "@/data/verticalDefinitions";
-import { GOOGLE_TOOLS } from "@/data/googleToolsRegistry";
 
 function formatDate(): string {
   const now = new Date();

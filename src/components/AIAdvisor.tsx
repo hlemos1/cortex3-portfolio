@@ -31,7 +31,6 @@ export default function AIAdvisor({ projects, isActive }: AIAdvisorProps) {
   const [error, setError] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const abortRef = useRef<AbortController | null>(null);
 
   // Auto-load proactive insights when tab becomes active
   useEffect(() => {

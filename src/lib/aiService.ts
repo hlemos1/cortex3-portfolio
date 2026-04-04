@@ -124,7 +124,7 @@ export function getCachedInsights(): { text: string; timestamp: number } | null 
 function setCachedInsights(text: string): void {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ text, timestamp: Date.now() }));
-  } catch {}
+  } catch { /* storage may be full or unavailable */ }
 }
 
 // Streaming fetch helper
