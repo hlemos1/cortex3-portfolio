@@ -8,9 +8,9 @@ describe("App", () => {
     expect(container.querySelector("div")).toBeTruthy();
   });
 
-  it("renders portfolio dashboard content", () => {
+  it("renders editora home content", () => {
     const { container } = render(<App />);
-    expect(container.textContent).toContain("CORTEX");
+    expect(container.textContent).toContain("Cortex3");
   });
 
   it("navigates to root by default", () => {
