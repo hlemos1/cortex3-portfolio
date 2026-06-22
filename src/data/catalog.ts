@@ -42,8 +42,7 @@ export const AUTOR = {
     "Saiu das categorias de base do Vasco e do Bangu para um subsolo em Botafogo com R$40 mil emprestados. " +
     "Construiu um grupo de R$250 milhoes em food service e, depois, um ecossistema de inteligencia artificial aplicada a negocios. " +
     "Escreve sobre o que operou: sociedade familiar, importacao, saida do gargalo, IA como infraestrutura e empresas como redes neurais.",
-  // TODO(henrique): confirmar a URL exata do perfil.
-  linkedin: "https://www.linkedin.com/in/henrique-lemos/",
+  linkedin: "https://www.linkedin.com/in/henrique-lemos-8155193b2",
 };
 
 export const EDITORA = {
