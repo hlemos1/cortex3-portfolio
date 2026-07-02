@@ -36,12 +36,13 @@ export function buildPortfolioContext(projects: Project[]): string {
     const score = calculateReadinessScore(p);
     const recs = generateRecommendations(p);
     const topGaps = recs.slice(0, 2).map((r) => r.toolName).join(", ");
-    lines.push(`- ${p.name} [${p.vertical}/${p.stage}/${p.country}] Score:${score} Rev:${p.revenueRange} Prio:${p.priority}${topGaps ? ` | Gaps: ${topGaps}` : ""}`);
+    lines.push(`- ${p.name} [${p.vertical}/${p.stage}/${p.country}] Score:${score}${p.revenueRange ? ` Rev:${p.revenueRange}` : ""} Prio:${p.priority}${topGaps ? ` | Gaps: ${topGaps}` : ""}`);
   }
   lines.push("");
 
   // Revenue projects
-  const revenueProjects = active.filter((p) => p.revenueRange !== "pre_revenue");
+  // revenueRange is optional (not in the public seed) — only list projects with explicit data
+  const revenueProjects = active.filter((p) => p.revenueRange && p.revenueRange !== "pre_revenue");
   if (revenueProjects.length > 0) {
     lines.push("PROJETOS COM RECEITA:");
     for (const p of revenueProjects) {

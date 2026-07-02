@@ -154,7 +154,8 @@ function clusterByVertical(projects: Project[]): VerticalCluster[] {
       const topGapEntry = Object.entries(gapCount).sort((a, b) => b[1] - a[1])[0];
       const topGap = topGapEntry ? GOOGLE_TOOLS.find((t) => t.id === topGapEntry[0])?.name || null : null;
 
-      const revenueProjects = projs.filter((p) => p.revenueRange !== "pre_revenue").length;
+      // revenueRange is optional — only count projects with explicit revenue data
+      const revenueProjects = projs.filter((p) => p.revenueRange && p.revenueRange !== "pre_revenue").length;
 
       return {
         vertical,
@@ -255,7 +256,7 @@ function generateInsights(projects: Project[], synergies: SynergyLink[], vertica
   }
 
   // 3. Revenue-generating projects without full stack
-  const revenueNoStack = active.filter((p) => p.revenueRange !== "pre_revenue" && calculateReadinessScore(p) < 50);
+  const revenueNoStack = active.filter((p) => p.revenueRange && p.revenueRange !== "pre_revenue" && calculateReadinessScore(p) < 50);
   if (revenueNoStack.length > 0) {
     insights.push({
       id: id(), type: "opportunity", severity: "high",
@@ -429,8 +430,8 @@ function calculateHealth(projects: Project[], insights: Insight[]): number {
   health -= insights.filter((i) => i.severity === "high").length * 8;
   health -= insights.filter((i) => i.severity === "medium").length * 3;
 
-  // Bonus for revenue-generating projects
-  const revenueProjects = active.filter((p) => p.revenueRange !== "pre_revenue").length;
+  // Bonus for revenue-generating projects (revenueRange is optional — count only explicit data)
+  const revenueProjects = active.filter((p) => p.revenueRange && p.revenueRange !== "pre_revenue").length;
   health += Math.min(revenueProjects * 5, 20);
 
   // Bonus for live/scaling projects
