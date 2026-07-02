@@ -19,7 +19,9 @@ export interface Project {
   stage: string;
   primaryUrl?: string;
   country: string;
-  revenueRange: string;
+  // Optional: revenue data is business-sensitive and is not shipped in the
+  // public seed. When absent, UI/reports must omit it (hide, never fake).
+  revenueRange?: string;
   tags: string[];
   priority: number;
   archived: boolean;

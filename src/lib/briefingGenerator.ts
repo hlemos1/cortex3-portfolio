@@ -135,13 +135,14 @@ export function generateBriefing(projects: Project[]): string {
   lines.push("PROJETOS COM RECEITA");
   lines.push(sr);
 
-  const revenueProjects = active.filter((p) => p.revenueRange !== "pre_revenue");
+  // revenueRange is optional (not in the public seed) — only list projects with explicit data
+  const revenueProjects = active.filter((p) => p.revenueRange && p.revenueRange !== "pre_revenue");
   if (revenueProjects.length === 0) {
-    lines.push("  Nenhum projeto com receita ativa.");
+    lines.push("  Nenhum projeto com dados de receita registrados.");
   } else {
     for (const p of revenueProjects) {
       const score = calculateReadinessScore(p);
-      lines.push(`  ${p.name} | Receita: ${revenueLabel(p.revenueRange)} | Score: ${score}/100 | ${stageLabel(p.stage)} | ${p.country}`);
+      lines.push(`  ${p.name} | Receita: ${revenueLabel(p.revenueRange ?? "")} | Score: ${score}/100 | ${stageLabel(p.stage)} | ${p.country}`);
     }
   }
   lines.push("");

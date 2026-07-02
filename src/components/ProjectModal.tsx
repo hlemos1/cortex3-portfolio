@@ -19,6 +19,7 @@ const COUNTRIES = [
 ];
 
 const REVENUE_RANGES = [
+  { value: "", label: "Nao informado" },
   { value: "pre_revenue", label: "Pre-revenue" },
   { value: "0_100k", label: "0 - 100k" },
   { value: "100k_1m", label: "100k - 1M" },
@@ -49,7 +50,7 @@ export default function ProjectModal({ project, onSave, onClose, onArchive }: Pr
   const [stage, setStage] = useState(project?.stage ?? "idea");
   const [primaryUrl, setPrimaryUrl] = useState(project?.primaryUrl ?? "");
   const [country, setCountry] = useState(project?.country ?? "BR");
-  const [revenueRange, setRevenueRange] = useState(project?.revenueRange ?? "pre_revenue");
+  const [revenueRange, setRevenueRange] = useState(project?.revenueRange ?? "");
   const [priority, setPriority] = useState(project?.priority ?? 0);
   const [tagsInput, setTagsInput] = useState(project?.tags?.join(", ") ?? "");
   const [notes, setNotes] = useState(project?.notes ?? "");
@@ -79,7 +80,7 @@ export default function ProjectModal({ project, onSave, onClose, onArchive }: Pr
       stage,
       primaryUrl: primaryUrl || undefined,
       country,
-      revenueRange,
+      revenueRange: revenueRange || undefined,
       tags,
       priority,
       archived: project?.archived ?? false,
